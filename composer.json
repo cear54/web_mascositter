@@ -3,7 +3,6 @@
     "description": "Sitio web informativo de MascoSitter",
     "license": "proprietary",
     "require": {
-        "php": ">=8.1",
-        "phpmailer/phpmailer": "^6.10"
+        "php": ">=8.1"
     }
 }

@@ -8,7 +8,9 @@ session_set_cookie_params([
 ]);
 session_start();
 
-$_SESSION['contact_csrf'] = bin2hex(random_bytes(32));
+if (!isset($_SESSION['contact_csrf'])) {
+  $_SESSION['contact_csrf'] = bin2hex(random_bytes(32));
+}
 $contactToken = htmlspecialchars($_SESSION['contact_csrf'], ENT_QUOTES, 'UTF-8');
 ?>
 <!doctype html>
@@ -20,8 +22,8 @@ $contactToken = htmlspecialchars($_SESSION['contact_csrf'], ENT_QUOTES, 'UTF-8')
   <meta name="description" content="Organiza los datos, rutinas y cuidados de tu mascota con MascoSitter.">
   <title>MascoSitter | El cuidado de tu mascota, más fácil</title>
   <link rel="icon" href="assets/images/mascositter-logo.gif" type="image/gif">
-  <link rel="stylesheet" href="assets/css/styles.css">
-  <script src="assets/js/site.js" defer></script>
+  <link rel="stylesheet" href="assets/css/styles.css?v=<?= filemtime(__DIR__ . '/assets/css/styles.css') ?>">
+  <script src="assets/js/site.js?v=<?= filemtime(__DIR__ . '/assets/js/site.js') ?>" defer></script>
 </head>
 <body>
   <header class="site-header">
@@ -246,11 +248,14 @@ $contactToken = htmlspecialchars($_SESSION['contact_csrf'], ENT_QUOTES, 'UTF-8')
             <input id="website" name="website" type="text" tabindex="-1" autocomplete="off">
           </div>
           <label for="name">Tu nombre</label>
-          <input id="name" name="name" type="text" autocomplete="name" maxlength="100" placeholder="¿Cómo te llamas?" required>
+          <p class="field-hint" id="name-hint">Máximo 100 caracteres. Te quedan <span id="name-remaining">100</span>.</p>
+          <input id="name" name="name" type="text" autocomplete="name" maxlength="100" aria-describedby="name-hint" placeholder="¿Cómo te llamas?" required>
           <label for="email">Tu correo</label>
-          <input id="email" name="email" type="email" autocomplete="email" maxlength="254" placeholder="nombre@correo.com" required>
+          <p class="field-hint" id="email-hint">Máximo 150 caracteres. Te quedan <span id="email-remaining">150</span>.</p>
+          <input id="email" name="email" type="email" autocomplete="email" maxlength="150" aria-describedby="email-hint" placeholder="nombre@correo.com" required>
           <label for="message">Tu comentario</label>
-          <textarea id="message" name="message" rows="4" maxlength="2000" placeholder="Cuéntanos en qué podemos ayudarte..." required></textarea>
+          <p class="field-hint" id="message-hint">Máximo 350 caracteres. Te quedan <span id="message-remaining">350</span>.</p>
+          <textarea id="message" name="message" rows="4" maxlength="350" aria-describedby="message-hint" placeholder="Cuéntanos en qué podemos ayudarte..." required></textarea>
           <div class="form-bottom">
             <p>Al enviar, aceptas nuestra <a href="https://cear54.github.io/mascositter-privacy/" target="_blank" rel="noopener noreferrer">política de privacidad</a>.</p>
             <button class="button button-dark" type="submit"><span class="submit-label">Enviar comentario</span><span class="submit-arrow" aria-hidden="true">↗</span></button>

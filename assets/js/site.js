@@ -20,6 +20,37 @@ if (menuToggle && siteNav) {
 
 const contactForm = document.querySelector('#contact-form');
 const formStatus = document.querySelector('#form-status');
+const characterCountFields = [
+  {
+    input: document.querySelector('#name'),
+    remaining: document.querySelector('#name-remaining'),
+  },
+  {
+    input: document.querySelector('#email'),
+    remaining: document.querySelector('#email-remaining'),
+  },
+  {
+    input: document.querySelector('#message'),
+    remaining: document.querySelector('#message-remaining'),
+  },
+];
+
+for (const field of characterCountFields) {
+  if (!isCountableField(field.input) || !field.remaining) continue;
+
+  const updateRemaining = () => updateCharacterCount(field.input, field.remaining);
+
+  field.input.addEventListener('input', updateRemaining);
+  updateRemaining();
+}
+
+function isCountableField(field) {
+  return field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement;
+}
+
+function updateCharacterCount(input, counter) {
+  counter.textContent = String(Math.max(0, input.maxLength - input.value.length));
+}
 
 if (contactForm instanceof HTMLFormElement && formStatus) {
   contactForm.addEventListener('submit', async (event) => {
@@ -43,13 +74,23 @@ if (contactForm instanceof HTMLFormElement && formStatus) {
       });
       const result = await response.json();
 
-      if (!response.ok || result.ok !== true) {
+      if (!response.ok || result.ok !== true || typeof result.csrf_token !== 'string') {
         throw new Error(result.message || 'No pudimos enviar tu comentario. Inténtalo de nuevo.');
       }
 
       formStatus.textContent = result.message;
       formStatus.dataset.state = 'success';
       contactForm.reset();
+      const csrfTokenInput = contactForm.querySelector('input[name="csrf_token"]');
+      if (csrfTokenInput instanceof HTMLInputElement) {
+        csrfTokenInput.value = result.csrf_token;
+        csrfTokenInput.defaultValue = result.csrf_token;
+      }
+      for (const field of characterCountFields) {
+        if (isCountableField(field.input) && field.remaining) {
+          updateCharacterCount(field.input, field.remaining);
+        }
+      }
     } catch (error) {
       formStatus.textContent = error instanceof Error
         ? error.message
